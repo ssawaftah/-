@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة النقلات الذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --dark-color: #2c3e50;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            padding: 0;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
+        }
+        
+        .dark-mode {
+            background-color: #1a1a1a;
+            color: #f8f9fa;
+        }
+        
+        /* باقي أنماط CSS من الكود السابق مع تحسينات */
+        /* ... */
+        
+        /* أنماط جديدة */
+        .map-container {
+            height: 300px;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .rating-stars {
+            color: #f39c12;
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .trips-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="user-banner">
+        <div class="user-info">
+            <h1 class="user-name" id="userDisplayName">مرحباً، يرجى تسجيل الدخول</h1>
+            <div class="user-role" id="userRole"></div>
+        </div>
+        <div class="header-actions">
+            <button id="darkModeToggle" class="icon-btn">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="logoutBtn" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="summary-cards">
+            <div class="summary-card">
+                <i class="fas fa-car"></i>
+                <span id="totalTransports">0 نقلات</span>
+            </div>
+            <div class="summary-card">
+                <i class="fas fa-money-bill-wave"></i>
+                <span id="totalAmount">0.00 د.أ</span>
+            </div>
+            <div class="summary-card">
+                <i class="fas fa-star"></i>
+                <span id="avgRating">4.5</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3><i class="fas fa-plus-circle"></i> إضافة نقلة جديدة</h3>
+            <div class="form-group">
+                <label for="transportDate"><i class="far fa-calendar-alt"></i> التاريخ:</label>
+                <input id="transportDate" type="date" required>
+            </div>
+            
+            <div class="form-group">
+                <label><i class="fas fa-route"></i> المسار:</label>
+                <div id="mapContainer" class="map-container"></div>
+                <button id="selectLocationBtn" class="btn">
+                    <i class="fas fa-map-marker-alt"></i> تحديد الموقع
+                </button>
+            </div>
+            
+            <div class="form-group">
+                <label for="distanceSelect"><i class="fas fa-road"></i> المسافة (كم):</label>
+                <select id="distanceSelect">
+                    <option value="0">اختر المسافة</option>
+                    <option value="1">1 كم</option>
+                    <option value="2">2 كم</option>
+                    <option value="3">3 كم</option>
+                </select>
+            </div>
+            
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input id="doublePrice" type="checkbox" class="custom-checkbox">
+                    <span class="checkbox-text"><i class="fas fa-retweet"></i> دبل</span>
+                </label>
+                <label class="checkbox-label">
+                    <input id="eveningTrip" type="checkbox" class="custom-checkbox">
+                    <span class="checkbox-text"><i class="fas fa-moon"></i> سهرة</span>
+                </label>
+            </div>
+            
+            <button id="addTransportBtn" class="btn primary">
+                <i class="fas fa-save"></i> حفظ النقلة
+            </button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="monthSelect"><i class="far fa-calendar"></i> تصفية حسب الشهر:</label>
+                <select id="monthSelect">
+                    <option value="">كل الشهور</option>
+                    <!-- سيتم تعبئة الخيارات عبر JavaScript -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="yearSelect"><i class="fas fa-filter"></i> السنة:</label>
+                <select id="yearSelect">
+                    <!-- سيتم تعبئة الخيارات عبر JavaScript -->
+                </select>
+            </div>
+        </div>
+
+        <div id="transportsContainer" class="trips-grid">
+            <!-- سيتم تعبئة النقلات عبر JavaScript -->
+        </div>
+    </div>
+
+    <!-- نافذة التعديل -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3><i class="fas fa-edit"></i> تعديل النقلة</h3>
+            <!-- محتوى مشابه لنموذج الإضافة -->
+        </div>
+    </div>
+
+    <!-- سيتم إضافة المزيد من العناصر هنا -->
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&libraries=places"></script>
+    <script src="app.js"></script>
+    
+    <script>
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            // سيتم نقل معظم الشيفرة إلى app.js
+            initApp();
+        });
+        
+        function initMap() {
+            // تهيئة الخريطة
+        }
+    </script>
+</body>
+</html>
