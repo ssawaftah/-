@@ -1,0 +1,68 @@
+import sqlite3
+from datetime import datetime
+
+def initialize_database():
+    """تهيئة قاعدة البيانات مع بيانات أولية"""
+    conn = sqlite3.connect('stories_bot.db')
+    cursor = conn.cursor()
+
+    # إنشاء الجداول
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS stories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        category TEXT NOT NULL,
+        author TEXT DEFAULT 'مجهول',
+        rating REAL DEFAULT 0,
+        views INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_premium BOOLEAN DEFAULT 0
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS ratings (
+        user_id INTEGER,
+        story_id INTEGER,
+        rating INTEGER,
+        PRIMARY KEY (user_id, story_id),
+        FOREIGN KEY (story_id) REFERENCES stories (id)
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        user_id INTEGER PRIMARY KEY,
+        username TEXT,
+        first_name TEXT,
+        last_name TEXT,
+        join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        is_admin BOOLEAN DEFAULT 0
+    )
+    ''')
+
+    # إضافة بيانات أولية (اختياري)
+    sample_stories = [
+        ('قصة رومانسية 1', 'محتوى القصة الرومانسية الأولى...', 'رومانسية', 'أحمد'),
+        ('قصة مثيرة 1', 'محتوى القصة المثيرة الأولى...', 'مثيرة', 'محمد'),
+        ('قصة خيال 1', 'محتوى قصة الخيال الأولى...', 'خيال', 'نور'),
+    ]
+
+    cursor.executemany(
+        'INSERT INTO stories (title, content, category, author) VALUES (?, ?, ?, ?)',
+        sample_stories
+    )
+
+    # إضافة مشرف (استبدل القيم بما يناسبك)
+    cursor.execute(
+        'INSERT INTO users (user_id, username, first_name, last_name, is_admin) VALUES (?, ?, ?, ?, ?)',
+        (6455001010, 'admin_username', 'Admin', 'User', 1)  # استبدل بـ ID المشرف الحقيقي
+    )
+
+    conn.commit()
+    conn.close()
+    print("تم إنشاء قاعدة البيانات بنجاح مع البيانات الأولية!")
+
+if __name__ == '__main__':
+    initialize_database()
